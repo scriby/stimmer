@@ -1,0 +1,11 @@
+{
+  "name": "stimmer",
+  "description": "Immer-based state tree",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Chris Scribner",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/scriby/stimmer"
+  }
+}
