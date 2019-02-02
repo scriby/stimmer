@@ -5,7 +5,36 @@
   "license": "MIT",
   "author": "Chris Scribner",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/scriby/stimmer"
+    "type": "git",
+    "url": "https://github.com/scriby/stimmer"
+  },
+  "devDependencies": {
+    "@types/jest": "23.3.13",
+    "@types/node": "10.12.21",
+    "immer": "1.12.1",
+    "jest": "24.0.0",
+    "source-map-support": "0.5.10",
+    "ts-jest": "23.10.5",
+    "typescript": "3.3.1"
+  },
+  "files": ["dist/src/**", "src/**", "tsconfig.json"],
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "rm -rf dist/* && tsc",
+    "coverage": "jest src --coverage",
+    "test": "jest src --watch",
+    "test-debug": "node --inspect-brk ./node_modules/.bin/jest src --runInBand --watch"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": "((\\.|/)test)\\.ts$",
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json",
+      "node"
+    ]
   }
 }
