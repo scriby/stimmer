@@ -20,8 +20,9 @@ export class Store<T> {
       draftCreated = true;
     }
 
+    let ret;
     try {
-      fn(draft);
+      ret = fn(draft);
     } finally {
       this.currentDraft = undefined;
     }
@@ -29,5 +30,7 @@ export class Store<T> {
     if (draftCreated) {
       (this.state as any) = finishDraft(draft);
     }
+
+    return ret;
   }
 }

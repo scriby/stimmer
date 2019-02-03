@@ -1,12 +1,15 @@
 import {Feature} from './feature';
 import {Store} from './store';
 
+const getValueAsync = (text: string) => Promise.resolve(text);
+
 interface State {
   test: TestFeatureState
 }
 
 interface TestFeatureState {
   age: number;
+  isUpdating: boolean;
   name: string,
 }
 
@@ -18,6 +21,7 @@ class TestFeature extends Feature<State, TestFeatureState> {
   protected initFeatureState(state: State) {
     state.test = {
       age: 30,
+      isUpdating: false,
       name: 'test'
     };
   }
@@ -30,6 +34,12 @@ class TestFeature extends Feature<State, TestFeatureState> {
     draft.age = newAge;
 
     this.updateName(newName);
+  });
+
+  asyncUpdateName = this.action(async(draft, newName: string) => {
+    this.updateName('before update');
+    const name = await getValueAsync(newName);
+    this.updateName(name);
   });
 }
 
@@ -54,5 +64,12 @@ describe('Feature', () => {
     const featureState = store.getState().test;
     expect(featureState.name).toBe('updated');
     expect(featureState.age).toBe(40);
+  });
+
+  it('updates the name asynchronously', async() => {
+    await testFeature.asyncUpdateName('updated');
+
+    const featureState = store.getState().test;
+    expect(featureState.name).toBe('updated');
   });
 });
