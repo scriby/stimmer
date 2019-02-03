@@ -24,20 +24,35 @@ class TestFeature extends Feature<State, TestFeatureState> {
     };
   }
 
-  updateName = this.action((draft, newName: string) => {
-    draft.name = newName;
+  updateName = this.action((newName: string) => {
+    this.draft.name = newName;
   });
 
-  updateAgeAndName = this.action((draft, newName: string, newAge: number) => {
-    draft.age = newAge;
+  updateAgeAndName = this.action((newName: string, newAge: number) => {
+    this.draft.age = newAge;
 
     this.updateName(newName);
   });
 
-  asyncUpdateName = this.action(async(draft, newName: string) => {
+  asyncNameUpdateUsingNestedAction = this.action(async(newName: string) => {
     this.updateName('before update');
     const name = await getValueAsync(newName);
     this.updateName(name);
+  });
+
+  asyncNameUpdateUsingAwait = this.action(async(newName: string) => {
+    const name = await getValueAsync(newName);
+
+    this.draft.name = name;
+  });
+
+  asyncNameUpdateUsingMultipleAwaits = this.action(async(newName: string) => {
+    let name = await getValueAsync(newName);
+    this.draft.name = `${name}_1`;
+    name = await getValueAsync(newName);
+    this.draft.name = `${name}_2`;
+    name = await getValueAsync(newName);
+    this.draft.name = `${name}_3`;
   });
 }
 
@@ -64,10 +79,44 @@ describe('Feature', () => {
     expect(featureState.age).toBe(40);
   });
 
-  it('updates the name asynchronously', async() => {
-    await testFeature.asyncUpdateName('updated');
+  it('updates the name asynchronously using nested actions', async() => {
+    await testFeature.asyncNameUpdateUsingNestedAction('updated');
 
     const featureState = store.getState().test;
     expect(featureState.name).toBe('updated');
+  });
+
+  it('updates the name asynchronously directly', async() => {
+    await testFeature.asyncNameUpdateUsingAwait('updated');
+
+    const featureState = store.getState().test;
+    expect(featureState.name).toBe('updated');
+  });
+
+  it('updates the name asynchronously through multiple awaits', async() => {
+    await testFeature.asyncNameUpdateUsingMultipleAwaits('updated');
+
+    const featureState = store.getState().test;
+    expect(featureState.name).toBe('updated_3');
+  });
+
+  it('interleaves async actions', async() => {
+    await Promise.all([
+      testFeature.asyncNameUpdateUsingMultipleAwaits('a'),
+      testFeature.asyncNameUpdateUsingMultipleAwaits('b'),
+      testFeature.asyncNameUpdateUsingMultipleAwaits('c'),
+    ]);
+
+    const featureState = store.getState().test;
+    expect(featureState.name).toBe('c_3');
+  });
+
+  it('interleaves async & sync actions', async() => {
+    const promise = testFeature.asyncNameUpdateUsingMultipleAwaits('a');
+    testFeature.updateName('updated');
+    expect(store.getState().test.name).toBe('updated');
+
+    await promise;
+    expect(store.getState().test.name).toBe('a_3');
   });
 });
