@@ -21,13 +21,9 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   }
 
   protected action<Rest extends any[], U>(fn: ActionFunction<Rest, U>) {
-    const self = this;
-
-    return function() {
-      const args = arguments;
-
-      return self.store._update(() => {
-        return (fn as Function).apply(self, args) as U;
+    return (...rest: Rest) => {
+      return this.store._update(() => {
+        return (fn as Function).apply(this, rest) as U;
       });
     }
   }
