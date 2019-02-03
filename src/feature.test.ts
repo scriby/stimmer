@@ -9,7 +9,6 @@ interface State {
 
 interface TestFeatureState {
   age: number;
-  isUpdating: boolean;
   name: string,
 }
 
@@ -21,7 +20,6 @@ class TestFeature extends Feature<State, TestFeatureState> {
   protected initFeatureState(state: State) {
     state.test = {
       age: 30,
-      isUpdating: false,
       name: 'test'
     };
   }
