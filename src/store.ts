@@ -39,27 +39,24 @@ export class Store<T> {
   }
 
   _update(fn: (draft: Draft<T>) => unknown) {
-    let draft;
     let draftCreated;
 
-    if (this.currentDraft) {
-      draft = this.currentDraft;
-    } else {
-      this.currentDraft = draft = createDraft(this.state);
+    if (!this.currentDraft) {
+      this.currentDraft = createDraft(this.state);
       draftCreated = true;
     }
 
     let ret;
     try {
-      ret = fn(draft);
+      ret = fn(this.currentDraft);
+
+      if (draftCreated) {
+        this.finishDraft(this.currentDraft);
+      }
     } finally {
       if (draftCreated) {
         this.currentDraft = undefined;
       }
-    }
-
-    if (draftCreated) {
-      this.finishDraft(draft);
     }
 
     return ret;
