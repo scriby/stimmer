@@ -32,6 +32,6 @@ describe('Feature', () => {
   it('updates the state with an action', () => {
     testFeature.updateName('updated');
 
-    expect(store.getRoot().test.name).toBe('updated');
+    expect(store.getState().test.name).toBe('updated');
   });
 });

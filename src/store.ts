@@ -1,11 +1,15 @@
-export class Store<T> {
-  private root: T = Object.create(null);
+import {Draft, produce} from 'immer';
 
-  getRoot(): T {
-    return this.root;
+export class Store<T> {
+  private state: T = Object.create(null);
+
+  getState(): T {
+    return this.state;
   }
 
-  setRoot(state: T) {
-    this.root = state;
+  update(fn: (draft: Draft<T>) => void) {
+    this.state = produce(this.state, (draft: Draft<T>) => {
+      fn(draft);
+    });
   }
 }

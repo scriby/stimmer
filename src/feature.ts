@@ -8,26 +8,22 @@ export abstract class Feature<STATE, FEATURE_STATE> {
     this.init();
   }
 
-  protected abstract getFeatureState(state: STATE): FEATURE_STATE;
-  protected abstract initFeatureState(state: STATE): void;
+  protected abstract getFeatureState(state: Draft<STATE>): FEATURE_STATE;
+  protected abstract initFeatureState(state: Draft<STATE>): void;
 
   protected action<Rest extends any[]>(fn: ActionFunction<FEATURE_STATE, Rest>) {
     return (...rest: Rest) => {
-      const newState = produce(this.store.getRoot(), (draft: Draft<STATE>) => {
-        const featureState = this.getFeatureState(draft as STATE);
+      this.store.update((draft: Draft<STATE>) => {
+        const featureState = this.getFeatureState(draft);
 
         (fn as Function).apply(this, [ featureState ].concat(rest));
       });
-
-      this.store.setRoot(newState);
     }
   }
 
   private init() {
-    const newState = produce(this.store.getRoot(), (draft: Draft<STATE>) => {
-      this.initFeatureState(draft as STATE);
+    this.store.update((draft: Draft<STATE>) => {
+      this.initFeatureState(draft);
     });
-
-    this.store.setRoot(newState);
   }
 }
