@@ -1,4 +1,4 @@
-import {Draft, produce} from 'immer';
+import {Draft, finishDraft} from 'immer';
 import {Store} from './store';
 
 type ActionFunction<T, Rest extends any[]> = (draft: Draft<T>, ...rest: Rest) => void;
@@ -13,7 +13,7 @@ export abstract class Feature<STATE, FEATURE_STATE> {
 
   protected action<Rest extends any[]>(fn: ActionFunction<FEATURE_STATE, Rest>) {
     return (...rest: Rest) => {
-      this.store.update((draft: Draft<STATE>) => {
+      this.store._update((draft: Draft<STATE>) => {
         const featureState = this.getFeatureState(draft);
 
         (fn as Function).apply(this, [ featureState ].concat(rest));
@@ -22,7 +22,7 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   }
 
   private init() {
-    this.store.update((draft: Draft<STATE>) => {
+    this.store._update((draft: Draft<STATE>) => {
       this.initFeatureState(draft);
     });
   }
