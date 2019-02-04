@@ -1,6 +1,10 @@
-import {Draft, produce, createDraft, finishDraft, Immutable} from 'immer';
+import {Draft, createDraft, finishDraft, Immutable} from 'immer';
+
+type StateChangeHandler<T> = (state: Immutable<T>) => unknown;
 
 export class Store<T> {
+  private changeHandlers: Array<StateChangeHandler<T>> = [];
+
   private state: T = Object.create(null);
 
   private currentDraft?: Draft<T>;
@@ -9,8 +13,20 @@ export class Store<T> {
     return this.state as Immutable<T>;
   }
 
+  addStateChangeHandler(callback: StateChangeHandler<T>) {
+    this.changeHandlers.push(callback);
+  }
+
+  removeStateChaneHandler(callback: StateChangeHandler<T>) {
+    this.changeHandlers = this.changeHandlers.filter(h => h !== callback);
+  }
+
   private finishDraft(draft: Draft<T>) {
     (this.state as any) = finishDraft(draft);
+
+    this.changeHandlers.forEach(handler => {
+      handler(this.state as Immutable<T>);
+    });
   }
 
   _getCurrentDraft() {

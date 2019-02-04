@@ -1,0 +1,1 @@
+export {RxjsAdapter} from './adapter';
