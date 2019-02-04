@@ -28,11 +28,16 @@ export class Store<T> {
 
     const draft = this.currentDraft = createDraft(this.state);
 
-    // Complete the draft as soon as possible. This will run before any additional promises awaited by the app
-    // code can complete before it was scheduled first.
-    Promise.resolve().then(() => {
-      this.finishDraft(draft);
-      this.currentDraft = undefined;
+    // Complete the draft asynchronously after it can be determined whether the current async "leg"
+    // will throw or not (if it throws, draft changes are not persisted).
+    Promise.resolve().then(() => Promise.resolve()).then(() => {
+      if (draft === this.currentDraft) {
+        try {
+          this.finishDraft(this.currentDraft);
+          this.currentDraft = undefined;
+        } catch (e) {
+        }
+      }
     });
 
     return this.currentDraft;
@@ -57,6 +62,17 @@ export class Store<T> {
       if (draftCreated) {
         this.currentDraft = undefined;
       }
+    }
+
+    if (ret instanceof Promise) {
+      ret.then(() => {
+        if (this.currentDraft) {
+          this.finishDraft(this.currentDraft);
+          this.currentDraft = undefined;
+        }
+      }).catch(() => {
+        this.currentDraft = undefined;
+      });
     }
 
     return ret;

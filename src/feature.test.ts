@@ -1,7 +1,11 @@
 import {Feature} from './feature';
 import {Store} from './store';
 
-const getValueAsync = (text: string) => Promise.resolve(text);
+const getValueAsync = (text: string) => new Promise<string>((resolve) => {
+  setTimeout(() => {
+    resolve(text);
+  }, 0);
+});
 
 interface State {
   test: TestFeatureState
@@ -53,6 +57,15 @@ class TestFeature extends Feature<State, TestFeatureState> {
     this.draft.name = `${name}_2`;
     name = await getValueAsync(newName);
     this.draft.name = `${name}_3`;
+  });
+
+  asyncTestWithErrors = this.action(async(newName: string) => {
+    let name = await getValueAsync(newName);
+    this.draft.name = `${name}_1`;
+    name = await getValueAsync(newName);
+    this.draft.name = `${name}_2`;
+
+    throw new Error('test');
   });
 }
 
@@ -118,5 +131,24 @@ describe('Feature', () => {
 
     await promise;
     expect(store.getState().test.name).toBe('a_3');
+  });
+
+  it('does not apply changes to drafts in the same leg that threw an error', async() => {
+    try {
+      await testFeature.asyncTestWithErrors('a');
+    } catch(e) {}
+
+    const featureState = store.getState().test;
+    expect(featureState.name).toBe('a_1')
+  });
+
+  it('errors thrown in an async test do not affect other async actions', async() => {
+    await Promise.all([
+      testFeature.asyncTestWithErrors('a').catch(() => {}),
+      testFeature.asyncNameUpdateUsingMultipleAwaits('b'),
+    ]);
+
+    const featureState = store.getState().test;
+    expect(featureState.name).toBe('b_3');
   });
 });

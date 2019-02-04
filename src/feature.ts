@@ -23,8 +23,8 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   protected action<Rest extends any[], U>(fn: ActionFunction<Rest, U>) {
     return (...rest: Rest) => {
       return this.store._update(() => {
-        return (fn as Function).apply(this, rest) as U;
-      });
+        return (fn as Function).apply(this, rest);
+      }) as U;
     }
   }
 
