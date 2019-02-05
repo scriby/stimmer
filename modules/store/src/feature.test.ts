@@ -1,3 +1,4 @@
+import {Draft} from 'immer';
 import {Feature} from './feature';
 import {Store} from './store';
 
@@ -17,11 +18,9 @@ interface TestFeatureState {
 }
 
 class TestFeature extends Feature<State, TestFeatureState> {
-  protected getFeatureState(state: State) {
-    return state.test;
-  }
+  protected getFeatureState = (state: State) => state.test;
 
-  protected initFeatureState(state: State) {
+  protected initFeatureState(state: Draft<State>) {
     state.test = {
       age: 30,
       name: 'test'
@@ -29,11 +28,11 @@ class TestFeature extends Feature<State, TestFeatureState> {
   }
 
   updateName = this.action((newName: string) => {
-    this.draft.name = newName;
+    this.state.name = newName;
   });
 
   updateAgeAndName = this.action((newName: string, newAge: number) => {
-    this.draft.age = newAge;
+    this.state.age = newAge;
 
     this.updateName(newName);
   });
@@ -47,23 +46,23 @@ class TestFeature extends Feature<State, TestFeatureState> {
   asyncNameUpdateUsingAwait = this.action(async(newName: string) => {
     const name = await getValueAsync(newName);
 
-    this.draft.name = name;
+    this.state.name = name;
   });
 
   asyncNameUpdateUsingMultipleAwaits = this.action(async(newName: string) => {
     let name = await getValueAsync(newName);
-    this.draft.name = `${name}_1`;
+    this.state.name = `${name}_1`;
     name = await getValueAsync(newName);
-    this.draft.name = `${name}_2`;
+    this.state.name = `${name}_2`;
     name = await getValueAsync(newName);
-    this.draft.name = `${name}_3`;
+    this.state.name = `${name}_3`;
   });
 
   asyncTestWithErrors = this.action(async(newName: string) => {
     let name = await getValueAsync(newName);
-    this.draft.name = `${name}_1`;
+    this.state.name = `${name}_1`;
     name = await getValueAsync(newName);
-    this.draft.name = `${name}_2`;
+    this.state.name = `${name}_2`;
 
     throw new Error('test');
   });

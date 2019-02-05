@@ -1,9 +1,11 @@
 import {Draft, createDraft, finishDraft, Immutable} from 'immer';
 
+type ActionCalledHandler = (name: string, args: any[]) => unknown;
 type StateChangeHandler<T> = (state: Immutable<T>) => unknown;
 
 export class Store<T> {
-  private changeHandlers: Array<StateChangeHandler<T>> = [];
+  private actionCalledHandlers: Array<ActionCalledHandler> = [];
+  private stateChangeHandlers: Array<StateChangeHandler<T>> = [];
 
   private state: T = Object.create(null);
 
@@ -13,23 +15,31 @@ export class Store<T> {
     return this.state as Immutable<T>;
   }
 
-  addStateChangeHandler(callback: StateChangeHandler<T>) {
-    this.changeHandlers.push(callback);
+  addStateChangeHandler(callback: StateChangeHandler<T>): void {
+    this.stateChangeHandlers.push(callback);
   }
 
-  removeStateChaneHandler(callback: StateChangeHandler<T>) {
-    this.changeHandlers = this.changeHandlers.filter(h => h !== callback);
+  removeStateChangeHandler(callback: StateChangeHandler<T>): void {
+    this.stateChangeHandlers = this.stateChangeHandlers.filter(h => h !== callback);
   }
 
-  private finishDraft(draft: Draft<T>) {
+  addActionCalledHandler(callback: ActionCalledHandler): void {
+    this.actionCalledHandlers.push(callback);
+  }
+
+  removeEventCalledHandler(callback: ActionCalledHandler): void {
+    this.actionCalledHandlers = this.actionCalledHandlers.filter(h => h !== callback);
+  }
+
+  private finishDraft(draft: Draft<T>): void {
     (this.state as any) = finishDraft(draft);
 
-    this.changeHandlers.forEach(handler => {
+    this.stateChangeHandlers.forEach(handler => {
       handler(this.state as Immutable<T>);
     });
   }
 
-  _getCurrentDraft() {
+  _getCurrentDraft(): Draft<T>|undefined {
     return this.currentDraft;
   }
 
@@ -37,7 +47,7 @@ export class Store<T> {
    * This is intended to be used by async actions using async/await. The draft created by this function
    * will be completed using a microtask (at the end of the current event loop in modern browsers).
    */
-  _startAsyncDraft() {
+  _startAsyncDraft(): Draft<T> {
     if (this.currentDraft) {
       throw new Error('Cannot start a new draft while one is active');
     }
@@ -59,7 +69,7 @@ export class Store<T> {
     return this.currentDraft;
   }
 
-  _update(fn: (draft: Draft<T>) => unknown) {
+  _update(fn: (draft: Draft<T>) => unknown): unknown {
     let draftCreated;
 
     if (!this.currentDraft) {
@@ -80,6 +90,7 @@ export class Store<T> {
       }
     }
 
+    // TODO: Thenable
     if (ret instanceof Promise) {
       ret.then(() => {
         if (this.currentDraft) {
@@ -92,5 +103,11 @@ export class Store<T> {
     }
 
     return ret;
+  }
+
+  _actionCalled(name: string, args: any[]): void {
+    this.actionCalledHandlers.forEach(handler => {
+      handler(name, args);
+    });
   }
 }
