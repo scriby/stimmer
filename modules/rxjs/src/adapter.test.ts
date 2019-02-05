@@ -9,7 +9,8 @@ interface State {
   }
 }
 
-const nameSelector = createSelector((state: State) => state.info, (info) => info.name);
+const infoSelector = (state: State) => state.info;
+const nameSelector = createSelector(infoSelector, (info) => info.name);
 
 describe('Rxjs adapter', () => {
   let rxjs: RxjsAdapter<State>;
@@ -42,5 +43,26 @@ describe('Rxjs adapter', () => {
 
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenLastCalledWith('test');
+  });
+
+  it('emits only when the value changes', () => {
+    const spy = jasmine.createSpy('state');
+    rxjs.select(nameSelector).pipe(tap(spy)).subscribe();
+
+    store._update((draft) => {
+      draft.info = { name: 'test' };
+    });
+
+    store._update((draft) => {
+      draft.info = { name: 'test' };
+    });
+
+    store._update((draft) => {
+      draft.info = { name: 'updated' };
+    });
+
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenNthCalledWith(1, 'test');
+    expect(spy).toHaveBeenLastCalledWith('updated');
   });
 });

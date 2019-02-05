@@ -1,5 +1,5 @@
 import {Subject} from 'rxjs';
-import {map, shareReplay} from 'rxjs/operators';
+import {distinctUntilChanged, map, shareReplay} from 'rxjs/operators';
 import {Immutable, Store} from 'stimmer';
 
 export class RxjsAdapter<T> {
@@ -11,7 +11,7 @@ export class RxjsAdapter<T> {
   }
 
   select<U>(selector: (state: Immutable<T>) => U) {
-    return this.state$.pipe(map(state => selector(state)));
+    return this.state$.pipe(map(state => selector(state)), distinctUntilChanged());
   }
 
   private onStoreChange = (state: Immutable<T>) => {
