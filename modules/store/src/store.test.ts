@@ -18,9 +18,9 @@ describe('Store', () => {
 
     store._update((draft) => {
       draft.name = 'updated';
-    });
+    }, { name: 'test', args: [] });
 
-    expect(spy).toHaveBeenCalledWith({ name: 'updated' });
+    expect(spy).toHaveBeenCalledWith({ name: 'updated' }, { name: 'test', args: [] });
     expect(store.getState()).toEqual({ name: 'updated' });
   });
 });

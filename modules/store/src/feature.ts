@@ -28,6 +28,9 @@ export abstract class Feature<STATE, FEATURE_STATE> {
 
       return this.store._update(() => {
         return (fn as Function).apply(this, rest);
+      }, {
+        name: actionFn.name,
+        args: rest
       }) as U;
     };
 
@@ -39,6 +42,9 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   private init(): void {
     this.store._update((draft: Draft<STATE>) => {
       this.initFeatureState(draft);
+    }, {
+      name: 'init',
+      args: []
     });
   }
 

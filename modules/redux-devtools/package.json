@@ -1,6 +1,6 @@
 {
-  "name": "stimmer-redux-devtools",
-  "description": "Redux devtools adapter for stimmer",
+  "name": "stimmer-rxjs",
+  "description": "Rxjs adapter for stimmer",
   "version": "0.0.1",
   "license": "MIT",
   "author": "Chris Scribner",
@@ -12,11 +12,13 @@
     "@types/jest": "23.3.13",
     "@types/node": "10.12.21",
     "jest": "23.6.0",
+    "reselect": "4.0.0",
     "source-map-support": "0.5.10",
     "ts-jest": "23.10.5",
     "typescript": "3.3.1"
   },
   "peerDependencies": {
+    "rxjs": " ^6.4.0",
     "stimmer": "^0.0.1"
   },
   "files": [

@@ -5,7 +5,7 @@
     "declaration": true,
     "downlevelIteration": true,
     "target": "ES5",
-    "lib": ["es2015", "es2015.iterable"],
+    "lib": ["dom", "es2015", "es2015.iterable"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,

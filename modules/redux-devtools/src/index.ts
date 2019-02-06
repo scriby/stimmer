@@ -1,0 +1,1 @@
+export {ReduxDevToolsAdapter} from './adapter';

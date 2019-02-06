@@ -1,7 +1,12 @@
 import {Draft, createDraft, finishDraft, Immutable} from 'immer';
 
+type ActionInfo = {
+  name: string,
+  args: any[]
+}
+
 type ActionCalledHandler = (name: string, args: any[]) => unknown;
-type StateChangeHandler<T> = (state: Immutable<T>) => unknown;
+type StateChangeHandler<T> = (state: Immutable<T>, action: ActionInfo) => unknown;
 
 export class Store<T> {
   private actionCalledHandlers: Array<ActionCalledHandler> = [];
@@ -31,11 +36,11 @@ export class Store<T> {
     this.actionCalledHandlers = this.actionCalledHandlers.filter(h => h !== callback);
   }
 
-  private finishDraft(draft: Draft<T>): void {
+  private finishDraft(draft: Draft<T>, actionInfo: ActionInfo): void {
     (this.state as any) = finishDraft(draft);
 
     this.stateChangeHandlers.forEach(handler => {
-      handler(this.state as Immutable<T>);
+      handler(this.state as Immutable<T>, actionInfo);
     });
   }
 
@@ -59,7 +64,10 @@ export class Store<T> {
     Promise.resolve().then(() => Promise.resolve()).then(() => {
       if (draft === this.currentDraft) {
         try {
-          this.finishDraft(this.currentDraft);
+          this.finishDraft(
+            this.currentDraft,
+            { name: 'async action', args: [] } // TODO: Use draft proxy to figure out which action it is
+          );
           this.currentDraft = undefined;
         } catch (e) {
         }
@@ -69,7 +77,7 @@ export class Store<T> {
     return this.currentDraft;
   }
 
-  _update(fn: (draft: Draft<T>) => unknown): unknown {
+  _update(fn: (draft: Draft<T>) => unknown, action: ActionInfo): unknown {
     let draftCreated;
 
     if (!this.currentDraft) {
@@ -82,7 +90,7 @@ export class Store<T> {
       ret = fn(this.currentDraft);
 
       if (draftCreated) {
-        this.finishDraft(this.currentDraft);
+        this.finishDraft(this.currentDraft, action);
       }
     } finally {
       if (draftCreated) {
@@ -94,7 +102,7 @@ export class Store<T> {
     if (ret instanceof Promise) {
       ret.then(() => {
         if (this.currentDraft) {
-          this.finishDraft(this.currentDraft);
+          this.finishDraft(this.currentDraft, action);
           this.currentDraft = undefined;
         }
       }).catch(() => {
