@@ -27,42 +27,40 @@ class TestFeature extends Feature<State, TestFeatureState> {
     };
   }
 
-  updateName = this.action((newName: string) => {
-    this.state.name = newName;
+  updateName = this.action((state, newName: string) => {
+    state.name = newName;
   });
 
-  updateAgeAndName = this.action((newName: string, newAge: number) => {
-    this.state.age = newAge;
+  updateAgeAndName = this.action((state, newName: string, newAge: number) => {
+    state.age = newAge;
 
     this.updateName(newName);
   });
 
-  asyncNameUpdateUsingNestedAction = this.action(async(newName: string) => {
+  asyncNameUpdateUsingNestedAction = this.action(async(state, newName: string) => {
     this.updateName('before update');
     const name = await getValueAsync(newName);
     this.updateName(name);
   });
 
-  asyncNameUpdateUsingAwait = this.action(async(newName: string) => {
-    const name = await getValueAsync(newName);
-
-    this.state.name = name;
+  asyncNameUpdateUsingAwait = this.action(async(state, newName: string) => {
+    state.name = await getValueAsync(newName);
   });
 
-  asyncNameUpdateUsingMultipleAwaits = this.action(async(newName: string) => {
+  asyncNameUpdateUsingMultipleAwaits = this.action(async(state, newName: string) => {
     let name = await getValueAsync(newName);
-    this.state.name = `${name}_1`;
+    state.name = `${name}_1`;
     name = await getValueAsync(newName);
-    this.state.name = `${name}_2`;
+    state.name = `${name}_2`;
     name = await getValueAsync(newName);
-    this.state.name = `${name}_3`;
+    state.name = `${name}_3`;
   });
 
-  asyncTestWithErrors = this.action(async(newName: string) => {
+  asyncTestWithErrors = this.action(async(state, newName: string) => {
     let name = await getValueAsync(newName);
-    this.state.name = `${name}_1`;
+    state.name = `${name}_1`;
     name = await getValueAsync(newName);
-    this.state.name = `${name}_2`;
+    state.name = `${name}_2`;
 
     throw new Error('test');
   });

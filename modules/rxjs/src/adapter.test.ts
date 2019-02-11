@@ -23,8 +23,8 @@ class AdapterTestFeature extends Feature<State, AdapterFeatureState> {
     };
   }
 
-  updateName = this.action((name: string) => {
-    this.state.name = name;
+  updateName = this.action((state, name: string) => {
+    state.name = name;
   });
 }
 

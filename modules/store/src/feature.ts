@@ -1,7 +1,7 @@
 import {Draft} from 'immer';
 import {Store} from './store';
 
-type ActionFunction<Rest extends any[], U> = (...rest: Rest) => U;
+type ActionFunction<T, Rest extends any[], U> = (state: T, ...rest: Rest) => U;
 
 export abstract class Feature<STATE, FEATURE_STATE> {
   constructor(private readonly store: Store<STATE>) {
@@ -12,7 +12,7 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   protected abstract getFeatureState(state: Draft<STATE>): Draft<FEATURE_STATE>;
   protected abstract initFeatureState(state: Draft<STATE>): void;
 
-  get state(): Draft<FEATURE_STATE> {
+  private getFeatureStateDraft(): Draft<FEATURE_STATE> {
     let draft = this.store._getCurrentDraft();
     if (!draft) {
       draft = this.store._startAsyncDraft();
@@ -21,13 +21,33 @@ export abstract class Feature<STATE, FEATURE_STATE> {
     return this.getFeatureState(draft);
   }
 
-  protected action<Rest extends any[], U>(fn: ActionFunction<Rest, U>): (...rest: Rest) => U {
+  private getFeatureStateProxy(): Draft<FEATURE_STATE> {
+    const proxy = new Proxy({}, {
+      defineProperty: () => {
+        throw new Error('Object.defineProperty() cannot be used on an Immer draft');
+      },
+      deleteProperty: (obj, prop) => delete (this.getFeatureStateDraft() as any)[prop],
+      get: (obj, prop) => (this.getFeatureStateDraft() as any)[prop],
+      getPrototypeOf: (obj) => Object.getPrototypeOf(this.getFeatureStateDraft()),
+      getOwnPropertyDescriptor: (obj, prop) => Reflect.getOwnPropertyDescriptor(this.getFeatureStateDraft() as any, prop),
+      has: (obj, prop) => prop in (this.getFeatureStateDraft() as any),
+      ownKeys: (obj) => Reflect.ownKeys(this.getFeatureStateDraft() as any),
+      set: (obj, prop, value) => (this.getFeatureStateDraft() as any)[prop] = value,
+      setPrototypeOf: () => {
+        throw new Error("Object.setPrototypeOf() cannot be used on an Immer draft");
+      }
+    });
+
+    return proxy as any;
+  }
+
+  protected action<Rest extends any[], U>(fn: ActionFunction<FEATURE_STATE, Rest, U>): (...rest: Rest) => U {
     const actionFn = (...rest: Rest) => {
       this.ensureActionNames();
       this.store._actionCalled((actionFn as any)._stimmerActionName, rest);
 
-      return this.store._update(() => {
-        return (fn as Function).apply(this, rest);
+      return this.store._update((draft) => {
+        return (fn as Function).apply(this, [this.getFeatureStateProxy()].concat(rest));
       }, {
         name: actionFn.name,
         args: rest
