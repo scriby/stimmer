@@ -1,8 +1,9 @@
 import {Draft, createDraft, finishDraft, Immutable} from 'immer';
 
-type ActionInfo = {
+export type ActionInfo = {
   name: string,
   args: any[]
+  isAsync?: boolean,
 }
 
 type ActionCalledHandler = (name: string, args: any[]) => unknown;
@@ -43,7 +44,7 @@ export class Store<T> {
    * This is intended to be used by async actions using async/await. The draft created by this function
    * will be completed using a microtask (at the end of the current event loop in modern browsers).
    */
-  _startAsyncDraft(): Draft<T> {
+  _startAsyncDraft(actionInfo: ActionInfo): Draft<T> {
     if (this.currentDraft) {
       throw new Error('Cannot start a new draft while one is active');
     }
@@ -57,7 +58,7 @@ export class Store<T> {
         try {
           this.finishDraft(
             this.currentDraft,
-            { name: 'async action', args: [] } // TODO: Use draft proxy to figure out which action it is
+            actionInfo
           );
           this.currentDraft = undefined;
         } catch (e) {
@@ -68,7 +69,7 @@ export class Store<T> {
     return this.currentDraft;
   }
 
-  _update(fn: (draft: Draft<T>) => unknown, action: ActionInfo): unknown {
+  _update(fn: (draft: Draft<T>) => unknown, actionInfo: ActionInfo): unknown {
     let draftCreated;
 
     if (!this.currentDraft) {
@@ -81,7 +82,7 @@ export class Store<T> {
       ret = fn(this.currentDraft);
 
       if (draftCreated) {
-        this.finishDraft(this.currentDraft, action);
+        this.finishDraft(this.currentDraft, actionInfo);
       }
     } finally {
       if (draftCreated) {
@@ -93,7 +94,7 @@ export class Store<T> {
     if (ret instanceof Promise) {
       ret.then(() => {
         if (this.currentDraft) {
-          this.finishDraft(this.currentDraft, action);
+          this.finishDraft(this.currentDraft, {...actionInfo, isAsync: true});
           this.currentDraft = undefined;
         }
       }).catch(() => {

@@ -1,5 +1,5 @@
 import {Draft} from 'immer';
-import {Store} from './store';
+import {ActionInfo, Store} from './store';
 
 type ActionFunction<T, Rest extends any[], U> = (state: T, ...rest: Rest) => U;
 
@@ -12,27 +12,30 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   protected abstract getFeatureState(state: Draft<STATE>): Draft<FEATURE_STATE>;
   protected abstract initFeatureState(state: Draft<STATE>): void;
 
-  private getFeatureStateDraft(): Draft<FEATURE_STATE> {
+  private getFeatureStateDraft(actionInfo: ActionInfo): Draft<FEATURE_STATE> {
     let draft = this.store._getCurrentDraft();
     if (!draft) {
-      draft = this.store._startAsyncDraft();
+      draft = this.store._startAsyncDraft({
+        ...actionInfo,
+        isAsync: true
+      });
     }
 
     return this.getFeatureState(draft);
   }
 
-  private getFeatureStateProxy(): Draft<FEATURE_STATE> {
+  private getFeatureStateProxy(actionInfo: ActionInfo): Draft<FEATURE_STATE> {
     const proxy = new Proxy({}, {
       defineProperty: () => {
         throw new Error('Object.defineProperty() cannot be used on an Immer draft');
       },
-      deleteProperty: (obj, prop) => delete (this.getFeatureStateDraft() as any)[prop],
-      get: (obj, prop) => (this.getFeatureStateDraft() as any)[prop],
-      getPrototypeOf: (obj) => Object.getPrototypeOf(this.getFeatureStateDraft()),
-      getOwnPropertyDescriptor: (obj, prop) => Reflect.getOwnPropertyDescriptor(this.getFeatureStateDraft() as any, prop),
-      has: (obj, prop) => prop in (this.getFeatureStateDraft() as any),
-      ownKeys: (obj) => Reflect.ownKeys(this.getFeatureStateDraft() as any),
-      set: (obj, prop, value) => (this.getFeatureStateDraft() as any)[prop] = value,
+      deleteProperty: (obj, prop) => delete (this.getFeatureStateDraft(actionInfo) as any)[prop],
+      get: (obj, prop) => (this.getFeatureStateDraft(actionInfo) as any)[prop],
+      getPrototypeOf: (obj) => Object.getPrototypeOf(this.getFeatureStateDraft(actionInfo)),
+      getOwnPropertyDescriptor: (obj, prop) => Reflect.getOwnPropertyDescriptor(this.getFeatureStateDraft(actionInfo) as any, prop),
+      has: (obj, prop) => prop in (this.getFeatureStateDraft(actionInfo) as any),
+      ownKeys: (obj) => Reflect.ownKeys(this.getFeatureStateDraft(actionInfo) as any),
+      set: (obj, prop, value) => (this.getFeatureStateDraft(actionInfo) as any)[prop] = value,
       setPrototypeOf: () => {
         throw new Error("Object.setPrototypeOf() cannot be used on an Immer draft");
       }
@@ -44,13 +47,14 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   protected action<Rest extends any[], U>(fn: ActionFunction<FEATURE_STATE, Rest, U>): (...rest: Rest) => U {
     const actionFn = (...rest: Rest) => {
       this.ensureActionNames();
-
-      return this.store._update((draft) => {
-        return (fn as Function).apply(this, [this.getFeatureStateProxy()].concat(rest));
-      }, {
+      const actionInfo = {
         name: (actionFn as any)._stimmerActionName,
         args: rest
-      }) as U;
+      };
+
+      return this.store._update((draft) => {
+        return (fn as Function).apply(this, [this.getFeatureStateProxy(actionInfo)].concat(rest));
+      }, actionInfo) as U;
     };
 
     actionFn._isStimmerActionFn = true;

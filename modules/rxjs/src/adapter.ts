@@ -18,7 +18,6 @@ export class RxjsAdapter<T> {
   }
 
   private onStoreChange = (state: Immutable<T>, actionInfo: { name: string, args: any[] }): void => {
-    console.log('***')
     this.actionsSubject$.next(actionInfo);
     this.stateSubject$.next(state);
   };
