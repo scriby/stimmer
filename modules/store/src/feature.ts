@@ -44,12 +44,11 @@ export abstract class Feature<STATE, FEATURE_STATE> {
   protected action<Rest extends any[], U>(fn: ActionFunction<FEATURE_STATE, Rest, U>): (...rest: Rest) => U {
     const actionFn = (...rest: Rest) => {
       this.ensureActionNames();
-      this.store._actionCalled((actionFn as any)._stimmerActionName, rest);
 
       return this.store._update((draft) => {
         return (fn as Function).apply(this, [this.getFeatureStateProxy()].concat(rest));
       }, {
-        name: actionFn.name,
+        name: (actionFn as any)._stimmerActionName,
         args: rest
       }) as U;
     };

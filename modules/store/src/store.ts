@@ -9,7 +9,6 @@ type ActionCalledHandler = (name: string, args: any[]) => unknown;
 type StateChangeHandler<T> = (state: Immutable<T>, action: ActionInfo) => unknown;
 
 export class Store<T> {
-  private actionCalledHandlers: Array<ActionCalledHandler> = [];
   private stateChangeHandlers: Array<StateChangeHandler<T>> = [];
 
   private state: T = Object.create(null);
@@ -26,14 +25,6 @@ export class Store<T> {
 
   removeStateChangeHandler(callback: StateChangeHandler<T>): void {
     this.stateChangeHandlers = this.stateChangeHandlers.filter(h => h !== callback);
-  }
-
-  addActionCalledHandler(callback: ActionCalledHandler): void {
-    this.actionCalledHandlers.push(callback);
-  }
-
-  removeEventCalledHandler(callback: ActionCalledHandler): void {
-    this.actionCalledHandlers = this.actionCalledHandlers.filter(h => h !== callback);
   }
 
   private finishDraft(draft: Draft<T>, actionInfo: ActionInfo): void {
@@ -111,11 +102,5 @@ export class Store<T> {
     }
 
     return ret;
-  }
-
-  _actionCalled(name: string, args: any[]): void {
-    this.actionCalledHandlers.forEach(handler => {
-      handler(name, args);
-    });
   }
 }

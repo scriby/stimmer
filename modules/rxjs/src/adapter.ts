@@ -6,11 +6,10 @@ export class RxjsAdapter<T> {
   private readonly stateSubject$ = new Subject<Immutable<T>>();
   private readonly state$ = this.stateSubject$.pipe(shareReplay(1));
 
-  private readonly actionsSubject$ = new Subject<{ name: string, args: any[]}>();
+  private readonly actionsSubject$ = new Subject<{ name: string, args: any[] }>();
   readonly actions$ = this.actionsSubject$.asObservable();
 
   constructor(private readonly store: Store<T>) {
-    this.store.addActionCalledHandler(this.onStoreAction);
     this.store.addStateChangeHandler(this.onStoreChange);
   }
 
@@ -18,11 +17,9 @@ export class RxjsAdapter<T> {
     return this.state$.pipe(map(state => selector(state)), distinctUntilChanged());
   }
 
-  private onStoreChange = (state: Immutable<T>): void => {
+  private onStoreChange = (state: Immutable<T>, actionInfo: { name: string, args: any[] }): void => {
+    console.log('***')
+    this.actionsSubject$.next(actionInfo);
     this.stateSubject$.next(state);
   };
-
-  private onStoreAction = (name: string, args: any[]): void => {
-    this.actionsSubject$.next({name, args});
-  }
 }
