@@ -23,6 +23,9 @@
     "tsconfig.json"
   ],
   "main": "dist/src/index.js",
+  "peerDependencies": {
+    "immer": "^2.0.0"
+  },
   "scripts": {
     "build": "rm -rf dist/* && tsc",
     "coverage": "jest src --coverage",

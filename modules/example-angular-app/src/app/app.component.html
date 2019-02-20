@@ -1,0 +1,5 @@
+<button (click)="onAddTodo()">Add todo</button>
+
+<div *ngFor="let todo of todos$ | async">
+  {{todo.name}}: {{todo.isComplete}}
+</div>
