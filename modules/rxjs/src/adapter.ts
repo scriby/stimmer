@@ -10,6 +10,9 @@ export class RxjsAdapter<T> {
   readonly actions$ = this.actionsSubject$.asObservable();
 
   constructor(private readonly store: Store<T>) {
+    // Make observable hot such that it tracks state updates before any external subscribers connect.
+    this.state$.subscribe(() => {});
+
     this.store.addStateChangeHandler(this.onStoreChange);
   }
 
