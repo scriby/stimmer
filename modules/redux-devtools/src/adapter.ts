@@ -10,7 +10,10 @@ export class ReduxDevToolsAdapter {
 
   constructor(private readonly store: Store<unknown>) {
     this.store.addStateChangeHandler((state, action) => {
-      this.connection.send({ type: action.name, args: action.args}, state);
+      const name = !action.isAsync ? action.name : action.name + ' (async)';
+      const type = `[${action.featureName}] ${name}`;
+
+      this.connection.send({ type, args: action.args}, state);
     });
   }
 
