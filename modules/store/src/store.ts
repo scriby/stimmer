@@ -1,6 +1,7 @@
 import {Draft, createDraft, finishDraft, Immutable} from 'immer';
 
 export type ActionInfo = {
+  featureName: string,
   name: string,
   args: any[]
   isAsync?: boolean,

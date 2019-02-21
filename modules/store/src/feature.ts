@@ -48,6 +48,7 @@ export abstract class Feature<STATE, FEATURE_STATE> {
     const actionFn = (...rest: Rest) => {
       this.ensureActionNames();
       const actionInfo = {
+        featureName: this.constructor.name,
         name: (actionFn as any)._stimmerActionName,
         args: rest
       };
@@ -66,6 +67,7 @@ export abstract class Feature<STATE, FEATURE_STATE> {
     this.store._update((draft: Draft<STATE>) => {
       this.initFeatureState(draft);
     }, {
+      featureName: this.constructor.name,
       name: 'init',
       args: []
     });
