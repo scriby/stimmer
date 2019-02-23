@@ -9,7 +9,7 @@ export class ReduxDevToolsAdapter {
   );
 
   constructor(private readonly store: Store<unknown>) {
-    this.store.addStateChangeHandler((state, action) => {
+    this.store.subscribe((state, action) => {
       const name = !action.isAsync ? action.name : action.name + ' (async)';
       const type = `[${action.featureName}] ${name}`;
 

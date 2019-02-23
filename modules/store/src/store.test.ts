@@ -14,13 +14,13 @@ describe('Store', () => {
   it ('calls change handlers', () => {
     const spy = jasmine.createSpy('state change');
 
-    store.addStateChangeHandler(spy);
+    store.subscribe(spy);
 
     store._update((draft) => {
       draft.name = 'updated';
-    }, { name: 'test', args: [] });
+    }, { featureName: 'test', name: 'test', args: [] });
 
-    expect(spy).toHaveBeenCalledWith({ name: 'updated' }, { name: 'test', args: [] });
+    expect(spy).toHaveBeenCalledWith({ name: 'updated' }, { featureName: 'test', name: 'test', args: [] });
     expect(store.getState()).toEqual({ name: 'updated' });
   });
 });

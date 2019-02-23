@@ -13,7 +13,7 @@ export class RxjsAdapter<T> {
     // Make observable hot such that it tracks state updates before any external subscribers connect.
     this.state$.subscribe(() => {});
 
-    this.store.addStateChangeHandler(this.onStoreChange);
+    this.store.subscribe(this.onStoreChange);
   }
 
   select<U>(selector: (state: Immutable<T>) => U): Observable<U> {

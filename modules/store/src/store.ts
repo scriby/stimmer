@@ -21,11 +21,11 @@ export class Store<T> {
     return this.state as Immutable<T>;
   }
 
-  addStateChangeHandler(callback: StateChangeHandler<T>): void {
+  subscribe(callback: StateChangeHandler<T>): void {
     this.stateChangeHandlers.push(callback);
   }
 
-  removeStateChangeHandler(callback: StateChangeHandler<T>): void {
+  unsubscribe(callback: StateChangeHandler<T>): void {
     this.stateChangeHandlers = this.stateChangeHandlers.filter(h => h !== callback);
   }
 

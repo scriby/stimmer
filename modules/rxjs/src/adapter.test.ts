@@ -112,7 +112,7 @@ describe('Rxjs adapter', () => {
       feature.updateName('updated');
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({ name: 'updateName', args: ['updated'] });
+      expect(spy).toHaveBeenCalledWith({ featureName: 'AdapterTestFeature', name: 'updateName', args: ['updated'] });
     });
 
     it('emits async actions', async() => {
@@ -122,9 +122,9 @@ describe('Rxjs adapter', () => {
       await feature.updateNameAsync('updated');
 
       expect(spy).toHaveBeenCalledTimes(3);
-      expect(spy).toHaveBeenNthCalledWith(1, { name: 'updateNameAsync', args: ['updated'] });
-      expect(spy).toHaveBeenNthCalledWith(2, { name: 'updateNameAsync', args: ['updated'], isAsync: true });
-      expect(spy).toHaveBeenNthCalledWith(3, { name: 'updateNameAsync', args: ['updated'], isAsync: true });
+      expect(spy).toHaveBeenNthCalledWith(1, { featureName: 'AdapterTestFeature', name: 'updateNameAsync', args: ['updated'] });
+      expect(spy).toHaveBeenNthCalledWith(2, { featureName: 'AdapterTestFeature', name: 'updateNameAsync', args: ['updated'], isAsync: true });
+      expect(spy).toHaveBeenNthCalledWith(3, { featureName: 'AdapterTestFeature', name: 'updateNameAsync', args: ['updated'], isAsync: true });
     });
   });
 });
