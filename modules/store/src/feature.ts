@@ -29,13 +29,19 @@ export abstract class Feature<STATE, FEATURE_STATE> {
       defineProperty: () => {
         throw new Error('Object.defineProperty() cannot be used on an Immer draft');
       },
-      deleteProperty: (obj, prop) => delete (this.getFeatureStateDraft(actionInfo) as any)[prop],
+      deleteProperty: (obj, prop) => {
+        delete (this.getFeatureStateDraft(actionInfo) as any)[prop];
+        return true;
+      },
       get: (obj, prop) => (this.getFeatureStateDraft(actionInfo) as any)[prop],
       getPrototypeOf: (obj) => Object.getPrototypeOf(this.getFeatureStateDraft(actionInfo)),
       getOwnPropertyDescriptor: (obj, prop) => Reflect.getOwnPropertyDescriptor(this.getFeatureStateDraft(actionInfo) as any, prop),
       has: (obj, prop) => prop in (this.getFeatureStateDraft(actionInfo) as any),
       ownKeys: (obj) => Reflect.ownKeys(this.getFeatureStateDraft(actionInfo) as any),
-      set: (obj, prop, value) => (this.getFeatureStateDraft(actionInfo) as any)[prop] = value,
+      set: (obj, prop, value) => {
+        (this.getFeatureStateDraft(actionInfo) as any)[prop] = value;
+        return true;
+      },
       setPrototypeOf: () => {
         throw new Error("Object.setPrototypeOf() cannot be used on an Immer draft");
       }
