@@ -1,7 +1,7 @@
 {
   "name": "stimmer",
   "description": "Immer-based state tree",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "author": "Chris Scribner",
   "repository": {
@@ -18,11 +18,12 @@
     "typescript": "3.3.1"
   },
   "files": [
-    "dist/src/**",
+    "dist/**",
     "src/**",
     "tsconfig.json"
   ],
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "peerDependencies": {
     "immer": "^2.0.0"
   },
