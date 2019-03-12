@@ -7,7 +7,6 @@ export type ActionInfo = {
   isAsync?: boolean,
 }
 
-type ActionCalledHandler = (name: string, args: any[]) => unknown;
 type StateChangeHandler<T> = (state: Immutable<T>, action: ActionInfo) => unknown;
 
 export class Store<T> {
