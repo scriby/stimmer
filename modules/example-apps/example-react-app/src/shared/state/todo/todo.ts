@@ -1,21 +1,13 @@
-import {Injectable} from '@angular/core';
 import {Draft} from 'immer';
-import {createSelector} from 'reselect';
 import {Feature, Store} from 'stimmer';
 
 import {Todo, TodoState} from './interfaces';
 import {State} from '../index';
-import {RxjsAdapter} from 'stimmer-rxjs';
 import {BackendService} from '../../services/backend/backend_service';
 
-@Injectable({ providedIn: 'root' })
 export class TodoFeature extends Feature<State, TodoState> {
-  readonly isLoading$ = this.rxjsAdapter.select(createSelector(this.getFeatureState, s => s.isLoading));
-  readonly todos$ = this.rxjsAdapter.select(createSelector(this.getFeatureState, s => s.todos));
-
   constructor(
     private readonly backendService: BackendService,
-    private readonly rxjsAdapter: RxjsAdapter<State>,
     store: Store<State>
   ) {
     super(store);

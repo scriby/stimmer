@@ -10,9 +10,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "paths": {
-      "stimmer": ["../store/src"],
-      "stimmer-redux-devtools": ["../redux-devtools/src"],
-      "stimmer-rxjs": ["../rxjs/src"]
+      "immer": ["node_modules/immer"],
+      "reselect": ["node_modules/reselect"],
+      "stimmer": ["../../store/src"],
+      "stimmer-redux-devtools": ["../../redux-devtools/src"],
+      "stimmer-rxjs": ["../../rxjs/src"]
     },
     "target": "es5",
     "typeRoots": [

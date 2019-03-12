@@ -1,7 +1,5 @@
-import {Injectable} from '@angular/core';
 import {Todo} from '../../state/todo/interfaces';
 
-@Injectable({ providedIn: 'root' })
 export class BackendService {
   fetchTodos(): Promise<Todo[]> {
     return new Promise((resolve) => {

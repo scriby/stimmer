@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy} from '@angular/core';
 import {Component} from '@angular/core';
-import {TodoFeature} from '../state/todo/todo';
+import {NgTodoFeature} from '../state/todo/todo';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -12,7 +12,7 @@ export class AppComponent {
   readonly isLoading$ = this.todo.isLoading$;
   readonly todos$ = this.todo.todos$;
 
-  constructor(private readonly todo: TodoFeature) {
+  constructor(private readonly todo: NgTodoFeature) {
     this.todo.loadTodos();
   }
 
